@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import axios from 'axios'
 import './App.css'
 import 'flag-icons/css/flag-icons.min.css'
-const API_URL = 'http://localhost:8000'
+const API_URL = 'https://mlbackend-fnjc.onrender.com'
 
 function App() {
   const [activeSection, setActiveSection] = useState('business')

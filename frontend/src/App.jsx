@@ -38,10 +38,27 @@ function App() {
     PrepTime: '',
     CookTime: '',
     TotalTime: '',
-    AggregatedRating: ''
+    AggregatedRating: 1
   })
   const [popularityResult, setPopularityResult] = useState(null)
   const [loadingBO2, setLoadingBO2] = useState(false)
+
+  // BO2 statistics data
+  const bo2Statistics = [
+    { Column: "Calories", Median: 361.9, Mean: 533.41 },
+    { Column: "FatContent", Median: 17.0, Mean: 28.20 },
+    { Column: "SaturatedFatContent", Median: 6.4, Mean: 11.47 },
+    { Column: "CholesterolContent", Median: 67.6, Mean: 107.62 },
+    { Column: "SodiumContent", Median: 429.2, Mean: 750.35 },
+    { Column: "CarbohydrateContent", Median: 30.2, Mean: 50.12 },
+    { Column: "FiberContent", Median: 2.2, Mean: 3.77 },
+    { Column: "SugarContent", Median: 6.5, Mean: 20.81 },
+    { Column: "ProteinContent", Median: 13.6, Mean: 20.82 },
+    { Column: "PrepTime", Median: 15.0, Mean: 37.0 },
+    { Column: "CookTime", Median: 30.0, Mean: 70.0 },
+    { Column: "TotalTime", Median: 45.0, Mean: 107 },
+    { Column: "AggregatedRating", Median: 1, Mean: 1 }
+  ]
   
   // Shared state
   const [error, setError] = useState(null)
@@ -138,10 +155,58 @@ function App() {
 
   const handleInputChangeBO2 = (e) => {
     const { name, value } = e.target
-    setFormDataBO2(prev => ({
-      ...prev,
-      [name]: value === '' ? '' : parseFloat(value) || 0
-    }))
+    const numValue = value === '' ? '' : parseFloat(value) || 0
+    
+    setFormDataBO2(prev => {
+      const updated = {
+        ...prev,
+        [name]: numValue
+      }
+      
+      // Auto-calculate TotalTime when PrepTime or CookTime changes
+      if (name === 'PrepTime' || name === 'CookTime') {
+        const prepTime = name === 'PrepTime' ? numValue : prev.PrepTime
+        const cookTime = name === 'CookTime' ? numValue : prev.CookTime
+        
+        // Convert to numbers, treating empty strings as 0
+        const prepTimeNum = (prepTime === '' || prepTime === null || prepTime === undefined) 
+          ? 0 
+          : (typeof prepTime === 'number' ? prepTime : parseFloat(prepTime) || 0)
+        const cookTimeNum = (cookTime === '' || cookTime === null || cookTime === undefined) 
+          ? 0 
+          : (typeof cookTime === 'number' ? cookTime : parseFloat(cookTime) || 0)
+        
+        updated.TotalTime = prepTimeNum + cookTimeNum
+      }
+      
+      return updated
+    })
+  }
+
+  const fillBO2WithStatistics = (type) => {
+    const statsMap = {}
+    bo2Statistics.forEach(stat => {
+      statsMap[stat.Column] = stat[type]
+    })
+    
+    const prepTime = statsMap.PrepTime || 0
+    const cookTime = statsMap.CookTime || 0
+    
+    setFormDataBO2({
+      Calories: statsMap.Calories,
+      FatContent: statsMap.FatContent,
+      SaturatedFatContent: statsMap.SaturatedFatContent,
+      CholesterolContent: statsMap.CholesterolContent,
+      SodiumContent: statsMap.SodiumContent,
+      CarbohydrateContent: statsMap.CarbohydrateContent,
+      FiberContent: statsMap.FiberContent,
+      SugarContent: statsMap.SugarContent,
+      ProteinContent: statsMap.ProteinContent,
+      PrepTime: prepTime,
+      CookTime: cookTime,
+      TotalTime: prepTime + cookTime,
+      AggregatedRating: 5
+    })
   }
 
   const handlePopularityPrediction = async (e) => {
@@ -154,6 +219,10 @@ function App() {
       // Convert all values to numbers
       const payload = {}
       for (const key in formDataBO2) {
+        // Skip TotalTime validation since it's auto-calculated
+        if (key === 'TotalTime') {
+          continue
+        }
         const value = formDataBO2[key]
         if (value === '' || value === null || value === undefined) {
           setError(`Please fill in all fields. Missing: ${key}`)
@@ -167,6 +236,10 @@ function App() {
           return
         }
       }
+      
+      // Always set AggregatedRating to 5 and calculate TotalTime
+      payload.AggregatedRating = 5
+      payload.TotalTime = (payload.PrepTime || 0) + (payload.CookTime || 0)
 
       const response = await axios.post(`${API_URL}/bo2/predict`, payload)
       setPopularityResult(response.data)
@@ -438,7 +511,51 @@ function App() {
             <div className="dual-container">
               {/* Left: Input */}
               <div className="input-container">
-                <h2>Caractéristiques de la Recette</h2>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+                  <h2 style={{ margin: 0 }}>Caractéristiques de la Recette</h2>
+                  <div style={{ display: 'flex', gap: '10px' }}>
+                    <button
+                      type="button"
+                      onClick={() => fillBO2WithStatistics('Mean')}
+                      style={{
+                        padding: '8px 16px',
+                        background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+                        color: 'white',
+                        border: 'none',
+                        borderRadius: '8px',
+                        fontSize: '0.85rem',
+                        fontWeight: '600',
+                        cursor: 'pointer',
+                        transition: 'all 0.3s ease',
+                        boxShadow: '0 2px 8px rgba(16, 185, 129, 0.3)'
+                      }}
+                      onMouseOver={(e) => e.target.style.transform = 'translateY(-2px)'}
+                      onMouseOut={(e) => e.target.style.transform = 'translateY(0)'}
+                    >
+                      Remplir (Moyenne)
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => fillBO2WithStatistics('Median')}
+                      style={{
+                        padding: '8px 16px',
+                        background: 'linear-gradient(135deg, #6366f1 0%, #4f46e5 100%)',
+                        color: 'white',
+                        border: 'none',
+                        borderRadius: '8px',
+                        fontSize: '0.85rem',
+                        fontWeight: '600',
+                        cursor: 'pointer',
+                        transition: 'all 0.3s ease',
+                        boxShadow: '0 2px 8px rgba(99, 102, 241, 0.3)'
+                      }}
+                      onMouseOver={(e) => e.target.style.transform = 'translateY(-2px)'}
+                      onMouseOut={(e) => e.target.style.transform = 'translateY(0)'}
+                    >
+                      Remplir (Médiane)
+                    </button>
+                  </div>
+                </div>
                 <form onSubmit={handlePopularityPrediction}>
                   <div style={{ display: 'grid', gap: '15px' }}>
                     <div>
@@ -583,30 +700,18 @@ function App() {
                           placeholder="Total Time"
                           step="0.1"
                           className="ingredients-textarea"
-                          style={{ height: '45px' }}
-                          required
+                          style={{ 
+                            height: '45px',
+                            background: '#f1f5f9',
+                            color: '#64748b',
+                            cursor: 'not-allowed'
+                          }}
+                          disabled
+                          readOnly
                         />
                       </div>
                     </div>
 
-                    <div>
-                      <label style={{ display: 'block', marginBottom: '5px', fontSize: '0.9rem', color: '#475569', fontWeight: '600' }}>
-                        Note Agrégée (0-5)
-                      </label>
-                      <input
-                        type="number"
-                        name="AggregatedRating"
-                        value={formDataBO2.AggregatedRating}
-                        onChange={handleInputChangeBO2}
-                        placeholder="Rating (0-5)"
-                        min="0"
-                        max="5"
-                        step="0.01"
-                        className="ingredients-textarea"
-                        style={{ height: '45px' }}
-                        required
-                      />
-                    </div>
                   </div>
 
                   <button type="submit" className="predict-btn" disabled={loadingBO2} style={{ marginTop: '20px' }}>
@@ -624,7 +729,7 @@ function App() {
                 <div style={{ marginTop: '20px', fontSize: '0.9rem', color: '#64748b', lineHeight: '1.6' }}>
                   <strong style={{ color: '#10b981' }}>Comment ça marche:</strong>
                   <ul style={{ marginTop: '8px', paddingLeft: '20px' }}>
-                    <li>Entrez les valeurs nutritionnelles, temps et note de la recette</li>
+                    <li>Entrez les valeurs nutritionnelles et temps de préparation de la recette</li>
                     <li>Le modèle XGBoost prédit si la recette sera populaire (classification binaire)</li>
                     <li>Obtenez la probabilité de popularité avec un score de confiance</li>
                     <li>Modèle entraîné avec ADASYN pour gérer le déséquilibre des classes</li>

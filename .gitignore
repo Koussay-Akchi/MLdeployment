@@ -3,7 +3,7 @@ node_modules/
 frontend/node_modules/
 
 # Data
-*.csv
+#*.csv
 /data/
 
 # Python

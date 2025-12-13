@@ -44,6 +44,16 @@ try:
     scaler_bo1 = joblib.load(MODEL_DIR / "BO1" / "scaler_knn.pkl")
     X_scaled_bo1 = np.load(MODEL_DIR / "BO1" / "X_scaled.npy")
     
+    df_pickle = MODEL_DIR / "BO1" / "df_knn_bo1.pkl"
+    df_csv = MODEL_DIR / "BO1" / "df_knn_bo1.csv"
+    recipes_bo1_df = None
+    if df_pickle.exists():
+        recipes_bo1_df = pd.read_pickle(df_pickle)
+    elif df_csv.exists():
+        recipes_bo1_df = pd.read_csv(df_csv)
+    else:
+        raise FileNotFoundError(f"No BO1 dataframe found at {df_pickle} or {df_csv}")
+    
     with open(MODEL_DIR / "BO1" / "nutrition_cols.json", "r") as f:
         nutrition_cols_bo1 = json.load(f)
     
@@ -51,6 +61,10 @@ try:
         metadata_bo1 = json.load(f)
     
     print("✓ BO1 model loaded successfully")
+    if recipes_bo1_df is not None:
+        print(f"✓ {len(recipes_bo1_df)} recipes available for recommendations")
+    else:
+        print("⚠ Warning: BO1 recipes dataframe not available")
 except Exception as e:
     print(f"⚠ Warning: Could not load BO1 model: {e}")
     model_bo1 = None
@@ -305,7 +319,7 @@ def predict_rating(features: RecipeFeatures):
         rating_stars = np.clip(rating_stars, 0, 5)
         
         # Find similar recipes based on ingredients
-        similar_recipes = []
+        similar_recipes = [find_similar_recipes(matched_ingredients, recipes_bo1_df, feature_names_bo3, top_n=6)]
         
         return {
             "predicted_rating": float(rating_stars),

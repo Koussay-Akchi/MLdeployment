@@ -1,0 +1,45 @@
+{
+  "model_type": "XGBoost",
+  "task": "Binary Classification",
+  "target": "popular",
+  "features": {
+    "nutrition": [
+      "Calories",
+      "FatContent",
+      "SaturatedFatContent",
+      "CholesterolContent",
+      "SodiumContent",
+      "CarbohydrateContent",
+      "FiberContent",
+      "SugarContent",
+      "ProteinContent"
+    ],
+    "time": [
+      "PrepTime",
+      "CookTime",
+      "TotalTime"
+    ],
+    "category": [],
+    "other": [
+      "AggregatedRating"
+    ]
+  },
+  "preprocessing": {
+    "imputer": "SimpleImputer(strategy='mean')",
+    "scaler": "StandardScaler()",
+    "resampling": "ADASYN"
+  },
+  "best_params": {
+    "colsample_bytree": 1.0,
+    "learning_rate": 0.1,
+    "max_depth": 4,
+    "n_estimators": 200,
+    "subsample": 0.8
+  },
+  "best_score": 0.9129951458494742,
+  "metrics": {
+    "precision": 0.8782109799157588,
+    "recall": 0.9038142620232172,
+    "f1_score": 0.8904563157388381
+  }
+}

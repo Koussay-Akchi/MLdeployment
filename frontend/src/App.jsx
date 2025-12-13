@@ -24,6 +24,25 @@ function App() {
   const [cuisineResult, setCuisineResult] = useState(null)
   const [loadingBO5, setLoadingBO5] = useState(false)
   
+  // BO2 state
+  const [formDataBO2, setFormDataBO2] = useState({
+    Calories: '',
+    FatContent: '',
+    SaturatedFatContent: '',
+    CholesterolContent: '',
+    SodiumContent: '',
+    CarbohydrateContent: '',
+    FiberContent: '',
+    SugarContent: '',
+    ProteinContent: '',
+    PrepTime: '',
+    CookTime: '',
+    TotalTime: '',
+    AggregatedRating: ''
+  })
+  const [popularityResult, setPopularityResult] = useState(null)
+  const [loadingBO2, setLoadingBO2] = useState(false)
+  
   // Shared state
   const [error, setError] = useState(null)
   const [apiStatus, setApiStatus] = useState(null)
@@ -117,6 +136,47 @@ function App() {
     }
   }
 
+  const handleInputChangeBO2 = (e) => {
+    const { name, value } = e.target
+    setFormDataBO2(prev => ({
+      ...prev,
+      [name]: value === '' ? '' : parseFloat(value) || 0
+    }))
+  }
+
+  const handlePopularityPrediction = async (e) => {
+    e.preventDefault()
+    setLoadingBO2(true)
+    setError(null)
+    setPopularityResult(null)
+
+    try {
+      // Convert all values to numbers
+      const payload = {}
+      for (const key in formDataBO2) {
+        const value = formDataBO2[key]
+        if (value === '' || value === null || value === undefined) {
+          setError(`Please fill in all fields. Missing: ${key}`)
+          setLoadingBO2(false)
+          return
+        }
+        payload[key] = parseFloat(value)
+        if (isNaN(payload[key])) {
+          setError(`Invalid value for ${key}. Please enter a valid number.`)
+          setLoadingBO2(false)
+          return
+        }
+      }
+
+      const response = await axios.post(`${API_URL}/bo2/predict`, payload)
+      setPopularityResult(response.data)
+    } catch (err) {
+      setError(err.response?.data?.detail || 'Failed to predict popularity. Make sure the API is running.')
+    } finally {
+      setLoadingBO2(false)
+    }
+  }
+
   // Helper function to get flag emoji for cuisine
   const getCuisineFlag = (cuisine) => {
     const flags = {
@@ -154,7 +214,7 @@ function App() {
           >
             Business Understanding
           </button>
-          {['bo1', 'bo3', 'bo5'].map(bo => (
+          {['bo1', 'bo2', 'bo3', 'bo5'].map(bo => (
             <button
               key={bo}
               className={`nav-link ${activeSection === bo ? 'active' : ''}`}
@@ -184,8 +244,21 @@ function App() {
                 </div>
               </div>
 
-              {/* BO3 */}
+              {/* BO2 */}
               <div className="trapezoid-card right">
+                <div className="trapezoid-content">
+                  <div className="bo-badge">BO2</div>
+                  <h3>Prédiction de Popularité de Recettes</h3>
+                  <div className="dso-section">
+                    <strong>DSO 2:</strong>
+                    <p>Classification binaire XGBoost pour prédire si une recette sera populaire basée sur les valeurs nutritionnelles, temps et note agrégée</p>
+                  </div>
+                  <button className="goto-btn" onClick={() => setActiveSection('bo2')}>Accéder à BO2 →</button>
+                </div>
+              </div>
+
+              {/* BO3 */}
+              <div className="trapezoid-card left">
                 <div className="trapezoid-content">
                   <div className="bo-badge">BO3</div>
                   <h3>Prédiction de Notes de Recettes</h3>
@@ -355,7 +428,299 @@ function App() {
           </div>
         )}
 
-        {activeSection === 'bo2' && renderPlaceholder(2, 'Recipe Classification')}
+        {activeSection === 'bo2' && (
+          <div className="bo3-section">
+            <div className="section-header">
+              <h1>Prédicteur de Popularité de Recettes</h1>
+              <p>Prédisez si une recette sera populaire en utilisant le modèle XGBoost de classification binaire</p>
+            </div>
+
+            <div className="dual-container">
+              {/* Left: Input */}
+              <div className="input-container">
+                <h2>Caractéristiques de la Recette</h2>
+                <form onSubmit={handlePopularityPrediction}>
+                  <div style={{ display: 'grid', gap: '15px' }}>
+                    <div>
+                      <label style={{ display: 'block', marginBottom: '5px', fontSize: '0.9rem', color: '#475569', fontWeight: '600' }}>
+                        Valeurs Nutritionnelles
+                      </label>
+                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+                        <input
+                          type="number"
+                          name="Calories"
+                          value={formDataBO2.Calories}
+                          onChange={handleInputChangeBO2}
+                          placeholder="Calories (kcal)"
+                          step="0.1"
+                          className="ingredients-textarea"
+                          style={{ height: '45px' }}
+                          required
+                        />
+                        <input
+                          type="number"
+                          name="FatContent"
+                          value={formDataBO2.FatContent}
+                          onChange={handleInputChangeBO2}
+                          placeholder="Fat Content (g)"
+                          step="0.1"
+                          className="ingredients-textarea"
+                          style={{ height: '45px' }}
+                          required
+                        />
+                        <input
+                          type="number"
+                          name="SaturatedFatContent"
+                          value={formDataBO2.SaturatedFatContent}
+                          onChange={handleInputChangeBO2}
+                          placeholder="Saturated Fat (g)"
+                          step="0.1"
+                          className="ingredients-textarea"
+                          style={{ height: '45px' }}
+                          required
+                        />
+                        <input
+                          type="number"
+                          name="CholesterolContent"
+                          value={formDataBO2.CholesterolContent}
+                          onChange={handleInputChangeBO2}
+                          placeholder="Cholesterol (mg)"
+                          step="0.1"
+                          className="ingredients-textarea"
+                          style={{ height: '45px' }}
+                          required
+                        />
+                        <input
+                          type="number"
+                          name="SodiumContent"
+                          value={formDataBO2.SodiumContent}
+                          onChange={handleInputChangeBO2}
+                          placeholder="Sodium (mg)"
+                          step="0.1"
+                          className="ingredients-textarea"
+                          style={{ height: '45px' }}
+                          required
+                        />
+                        <input
+                          type="number"
+                          name="CarbohydrateContent"
+                          value={formDataBO2.CarbohydrateContent}
+                          onChange={handleInputChangeBO2}
+                          placeholder="Carbohydrates (g)"
+                          step="0.1"
+                          className="ingredients-textarea"
+                          style={{ height: '45px' }}
+                          required
+                        />
+                        <input
+                          type="number"
+                          name="FiberContent"
+                          value={formDataBO2.FiberContent}
+                          onChange={handleInputChangeBO2}
+                          placeholder="Fiber (g)"
+                          step="0.1"
+                          className="ingredients-textarea"
+                          style={{ height: '45px' }}
+                          required
+                        />
+                        <input
+                          type="number"
+                          name="SugarContent"
+                          value={formDataBO2.SugarContent}
+                          onChange={handleInputChangeBO2}
+                          placeholder="Sugar (g)"
+                          step="0.1"
+                          className="ingredients-textarea"
+                          style={{ height: '45px' }}
+                          required
+                        />
+                        <input
+                          type="number"
+                          name="ProteinContent"
+                          value={formDataBO2.ProteinContent}
+                          onChange={handleInputChangeBO2}
+                          placeholder="Protein (g)"
+                          step="0.1"
+                          className="ingredients-textarea"
+                          style={{ height: '45px' }}
+                          required
+                        />
+                      </div>
+                    </div>
+
+                    <div>
+                      <label style={{ display: 'block', marginBottom: '5px', fontSize: '0.9rem', color: '#475569', fontWeight: '600' }}>
+                        Temps (minutes)
+                      </label>
+                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '10px' }}>
+                        <input
+                          type="number"
+                          name="PrepTime"
+                          value={formDataBO2.PrepTime}
+                          onChange={handleInputChangeBO2}
+                          placeholder="Prep Time"
+                          step="0.1"
+                          className="ingredients-textarea"
+                          style={{ height: '45px' }}
+                          required
+                        />
+                        <input
+                          type="number"
+                          name="CookTime"
+                          value={formDataBO2.CookTime}
+                          onChange={handleInputChangeBO2}
+                          placeholder="Cook Time"
+                          step="0.1"
+                          className="ingredients-textarea"
+                          style={{ height: '45px' }}
+                          required
+                        />
+                        <input
+                          type="number"
+                          name="TotalTime"
+                          value={formDataBO2.TotalTime}
+                          onChange={handleInputChangeBO2}
+                          placeholder="Total Time"
+                          step="0.1"
+                          className="ingredients-textarea"
+                          style={{ height: '45px' }}
+                          required
+                        />
+                      </div>
+                    </div>
+
+                    <div>
+                      <label style={{ display: 'block', marginBottom: '5px', fontSize: '0.9rem', color: '#475569', fontWeight: '600' }}>
+                        Note Agrégée (0-5)
+                      </label>
+                      <input
+                        type="number"
+                        name="AggregatedRating"
+                        value={formDataBO2.AggregatedRating}
+                        onChange={handleInputChangeBO2}
+                        placeholder="Rating (0-5)"
+                        min="0"
+                        max="5"
+                        step="0.01"
+                        className="ingredients-textarea"
+                        style={{ height: '45px' }}
+                        required
+                      />
+                    </div>
+                  </div>
+
+                  <button type="submit" className="predict-btn" disabled={loadingBO2} style={{ marginTop: '20px' }}>
+                    {loadingBO2 ? (
+                      <>
+                        <span className="spinner"></span>
+                        Analyse en cours...
+                      </>
+                    ) : (
+                      'Prédire la Popularité'
+                    )}
+                  </button>
+                </form>
+                
+                <div style={{ marginTop: '20px', fontSize: '0.9rem', color: '#64748b', lineHeight: '1.6' }}>
+                  <strong style={{ color: '#10b981' }}>Comment ça marche:</strong>
+                  <ul style={{ marginTop: '8px', paddingLeft: '20px' }}>
+                    <li>Entrez les valeurs nutritionnelles, temps et note de la recette</li>
+                    <li>Le modèle XGBoost prédit si la recette sera populaire (classification binaire)</li>
+                    <li>Obtenez la probabilité de popularité avec un score de confiance</li>
+                    <li>Modèle entraîné avec ADASYN pour gérer le déséquilibre des classes</li>
+                  </ul>
+                </div>
+              </div>
+
+              {/* Right: Results */}
+              <div className="results-container">
+                <h2>Résultats de Prédiction</h2>
+                
+                {!popularityResult && !error && (
+                  <div className="empty-state">
+                    <p>Remplissez le formulaire et cliquez sur prédire pour voir les résultats</p>
+                  </div>
+                )}
+
+                {error && (
+                  <div className="error-display">
+                    <h3>Erreur de Prédiction</h3>
+                    <p>{error}</p>
+                  </div>
+                )}
+
+                {popularityResult && (
+                  <div className="prediction-display">
+                    <div 
+                      className="rating-section" 
+                      style={{
+                        background: popularityResult.is_popular
+                          ? 'radial-gradient(circle at 30% 40%, #ecfdf5 0%, #d1fae5 50%, #a7f3d0 100%)'
+                          : 'radial-gradient(circle at 30% 40%, #fef2f2 0%, #fee2e2 50%, #fecaca 100%)'
+                      }}
+                    >
+                      <div className="rating-label" style={{ fontSize: '0.9rem', marginBottom: '10px' }}>
+                        PRÉDICTION
+                      </div>
+                      <div className="rating-value" style={{ 
+                        fontSize: '2.5rem',
+                        color: popularityResult.is_popular ? '#059669' : '#dc2626'
+                      }}>
+                        {popularityResult.prediction}
+                      </div>
+                      <div className="rating-label" style={{ fontSize: '1rem', marginTop: '10px' }}>
+                        {popularityResult.confidence}% Confiance
+                      </div>
+                    </div>
+
+                    {/* Probabilities */}
+                    <div style={{ marginTop: '20px', padding: '15px', background: '#f8fafc', borderRadius: '8px' }}>
+                      <strong style={{ fontSize: '0.9rem', color: '#475569' }}>Probabilités:</strong>
+                      <div style={{ marginTop: '10px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                        <div style={{ 
+                          padding: '12px', 
+                          background: popularityResult.is_popular ? '#d1fae5' : '#f1f5f9', 
+                          borderRadius: '8px',
+                          display: 'flex',
+                          justifyContent: 'space-between',
+                          alignItems: 'center',
+                          border: popularityResult.is_popular ? '2px solid #10b981' : '2px solid transparent'
+                        }}>
+                          <span style={{ fontWeight: '600', color: '#475569' }}>Popular</span>
+                          <span style={{ fontWeight: '700', color: '#10b981', fontSize: '1.1rem' }}>
+                            {popularityResult.probabilities.popular}%
+                          </span>
+                        </div>
+                        <div style={{ 
+                          padding: '12px', 
+                          background: !popularityResult.is_popular ? '#fee2e2' : '#f1f5f9', 
+                          borderRadius: '8px',
+                          display: 'flex',
+                          justifyContent: 'space-between',
+                          alignItems: 'center',
+                          border: !popularityResult.is_popular ? '2px solid #ef4444' : '2px solid transparent'
+                        }}>
+                          <span style={{ fontWeight: '600', color: '#475569' }}>Not Popular</span>
+                          <span style={{ fontWeight: '700', color: '#ef4444', fontSize: '1.1rem' }}>
+                            {popularityResult.probabilities.not_popular}%
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Model Performance Info */}
+                    <div style={{ marginTop: '20px', padding: '15px', background: '#f8fafc', borderRadius: '8px', fontSize: '0.85rem' }}>
+                      <strong style={{ color: '#475569' }}>Performance du Modèle:</strong>
+                      <div style={{ marginTop: '8px', color: '#64748b' }}>
+                        <div>Précision: 87.8% | Rappel: 90.4% | F1-Score: 89.0%</div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
         {activeSection === 'bo4' && renderPlaceholder(4, 'Recipe Recommendation System')}
         
         {activeSection === 'bo5' && (

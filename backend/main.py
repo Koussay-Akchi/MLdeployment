@@ -84,6 +84,30 @@ except Exception as e:
     print(f"⚠ Warning: Could not load BO5 model: {e}")
     model_bo5 = None
 
+# BO2 - XGBoost Popularity Classifier
+try:
+    model_bo2 = joblib.load(MODEL_DIR / "BO2" / "xgb_model_bo2.pkl")
+    scaler_bo2 = joblib.load(MODEL_DIR / "BO2" / "scaler_bo2.pkl")
+    imputer_bo2 = joblib.load(MODEL_DIR / "BO2" / "imputer_bo2.pkl")
+    
+    with open(MODEL_DIR / "BO2" / "feature_names.json", "r") as f:
+        feature_names_bo2 = json.load(f)
+    
+    with open(MODEL_DIR / "BO2" / "nutrition_cols.json", "r") as f:
+        nutrition_cols_bo2 = json.load(f)
+    
+    with open(MODEL_DIR / "BO2" / "time_cols.json", "r") as f:
+        time_cols_bo2 = json.load(f)
+    
+    with open(MODEL_DIR / "BO2" / "model_metadata.json", "r") as f:
+        metadata_bo2 = json.load(f)
+    
+    print("✓ BO2 model loaded successfully")
+    print(f"✓ Binary classification model | {len(feature_names_bo2)} features")
+except Exception as e:
+    print(f"⚠ Warning: Could not load BO2 model: {e}")
+    model_bo2 = None
+
 
 class RecipeFeatures(BaseModel):
     """Input features for recipe rating prediction (BO3)"""
@@ -101,6 +125,23 @@ class CuisineClassificationRequest(BaseModel):
     ingredients: list[str]
 
 
+class PopularityPredictionRequest(BaseModel):
+    """Input for popularity prediction (BO2)"""
+    Calories: float
+    FatContent: float
+    SaturatedFatContent: float
+    CholesterolContent: float
+    SodiumContent: float
+    CarbohydrateContent: float
+    FiberContent: float
+    SugarContent: float
+    ProteinContent: float
+    PrepTime: float
+    CookTime: float
+    TotalTime: float
+    AggregatedRating: float
+
+
 @app.get("/")
 def root():
     """Health check endpoint"""
@@ -109,11 +150,13 @@ def root():
         "status": "running",
         "models": {
             "BO1_loaded": model_bo1 is not None,
+            "BO2_loaded": model_bo2 is not None,
             "BO3_loaded": model_bo3 is not None,
             "BO5_loaded": model_bo5 is not None
         },
         "endpoints": {
             "bo1_recommend": "/bo1/recommend",
+            "bo2_predict": "/bo2/predict",
             "bo3_predict": "/bo3/predict",
             "bo5_classify": "/bo5/classify",
             "model_info": "/model-info"
@@ -141,6 +184,17 @@ def get_model_info():
                 "rmse_test": metadata_bo3.get("rmse_test"),
                 "r2_test": metadata_bo3.get("r2_test")
             } if model_bo3 else None
+        },
+        "BO2": {
+            "loaded": model_bo2 is not None,
+            "model_type": metadata_bo2.get("model_type") if model_bo2 else None,
+            "task": metadata_bo2.get("task") if model_bo2 else None,
+            "target": metadata_bo2.get("target") if model_bo2 else None,
+            "performance": {
+                "precision": metadata_bo2.get("metrics", {}).get("precision"),
+                "recall": metadata_bo2.get("metrics", {}).get("recall"),
+                "f1_score": metadata_bo2.get("metrics", {}).get("f1_score")
+            } if model_bo2 else None
         },
         "BO5": {
             "loaded": model_bo5 is not None,
@@ -394,6 +448,70 @@ def recommend_recipes(request: RecipeSearchRequest):
         raise HTTPException(status_code=500, detail=f"Recommendation error: {str(e)}")
 
 
+@app.post("/bo2/predict")
+def predict_popularity(request: PopularityPredictionRequest):
+    """BO2: Predict recipe popularity (binary classification) from nutrition, time, and rating"""
+    if model_bo2 is None:
+        raise HTTPException(
+            status_code=503,
+            detail="BO2 model not loaded. Please check model files."
+        )
+    
+    try:
+        # Convert request to dictionary
+        input_dict = request.dict()
+        
+        # Create feature array in the correct order
+        feature_array = np.array([[
+            input_dict['Calories'],
+            input_dict['FatContent'],
+            input_dict['SaturatedFatContent'],
+            input_dict['CholesterolContent'],
+            input_dict['SodiumContent'],
+            input_dict['CarbohydrateContent'],
+            input_dict['FiberContent'],
+            input_dict['SugarContent'],
+            input_dict['ProteinContent'],
+            input_dict['PrepTime'],
+            input_dict['CookTime'],
+            input_dict['TotalTime'],
+            input_dict['AggregatedRating']
+        ]])
+        
+        # Apply imputation (in case of missing values)
+        feature_array = imputer_bo2.transform(feature_array)
+        
+        # Apply scaling
+        feature_array_scaled = scaler_bo2.transform(feature_array)
+        
+        # Make prediction
+        prediction = model_bo2.predict(feature_array_scaled)[0]
+        prediction_proba = model_bo2.predict_proba(feature_array_scaled)[0]
+        
+        # Get probabilities
+        prob_not_popular = float(prediction_proba[0])
+        prob_popular = float(prediction_proba[1])
+        
+        is_popular = bool(prediction == 1)
+        confidence = prob_popular if is_popular else prob_not_popular
+        
+        return {
+            "is_popular": is_popular,
+            "prediction": "Popular" if is_popular else "Not Popular",
+            "confidence": round(confidence * 100, 2),
+            "probabilities": {
+                "popular": round(prob_popular * 100, 2),
+                "not_popular": round(prob_not_popular * 100, 2)
+            },
+            "input_features": input_dict
+        }
+    
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Prediction error: {str(e)}")
+
+
 @app.post("/bo5/classify")
 def classify_cuisine(request: CuisineClassificationRequest):
     """BO5: Classify cuisine type from ingredients using XGBoost"""
@@ -482,6 +600,7 @@ if __name__ == "__main__":
     print("📍 API will be available at: http://localhost:8000")
     print("📖 API Docs: http://localhost:8000/docs")
     print("🎯 BO1 (KNN Recommendations): /bo1/recommend")
+    print("🎯 BO2 (Popularity Prediction): /bo2/predict")
     print("🎯 BO3 (Rating Prediction): /bo3/predict")
     print("🎯 BO5 (Cuisine Classification): /bo5/classify")
     print("="*60 + "\n")

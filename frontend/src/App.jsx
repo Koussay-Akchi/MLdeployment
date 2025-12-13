@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import axios from 'axios'
 import './App.css'
 import 'flag-icons/css/flag-icons.min.css'
-const API_URL = 'https://mlbackend-fnjc.onrender.com'
+const API_URL = 'http://localhost:8000'
 
 function App() {
   const [activeSection, setActiveSection] = useState('business')
@@ -511,40 +511,7 @@ function App() {
               </div>
             </div>
 
-            {/* Similar Recipes - Full Width Below */}
-            {recommendations && recommendations.recommendations && recommendations.recommendations.length > 0 && (
-              <div className="similar-section">
-                <h2>Recettes Similaires Recommandées</h2>
-                <div className="recipes-grid">
-                  {recommendations.recommendations.map((recipe, idx) => (
-                    <div key={idx} className="recipe-card-modern">
-                      <div className="recipe-header">
-                        <h3>{recipe.name}</h3>
-                        <div className="recipe-rating-badge" style={{ background: '#d1fae5' }}>
-                          <span className="badge-text" style={{ color: '#065f46', fontSize: '1rem' }}>
-                            {recipe.similarity_percentage}%
-                          </span>
-                        </div>
-                      </div>
-
-                      <div className="recipe-body">
-                        <div className="ingredients-section">
-                          <strong>Nutritional Profile:</strong>
-                          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '8px', marginTop: '10px' }}>
-                            {Object.entries(recipe.nutrition).map(([key, value]) => (
-                              <div key={key} style={{ padding: '6px', background: '#f1f5f9', borderRadius: '4px', fontSize: '0.75rem' }}>
-                                <div style={{ color: '#64748b', marginBottom: '2px' }}>{key}</div>
-                                <div style={{ color: '#10b981', fontWeight: '600' }}>{value}</div>
-                              </div>
-                            ))}
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
+            {/* Similar recipes listing removed per request */}
           </div>
         )}
 
@@ -1302,7 +1269,6 @@ function App() {
                   <ul style={{ marginTop: '8px', paddingLeft: '20px' }}>
                     <li>Entrez une liste d'ingrédients que vous avez</li>
                     <li>Notre modèle Random Forest prédit la note de la recette (0-5 étoiles)</li>
-                    <li>Obtenez 6 recettes similaires de notre base de données avec pourcentages de correspondance</li>
                   </ul>
                 </div>
               </div>
@@ -1354,46 +1320,7 @@ function App() {
               </div>
             </div>
 
-            {/* Similar Recipes - Full Width Below */}
-            {prediction && prediction.similar_recipes && prediction.similar_recipes.length > 0 && (
-              <div className="similar-section">
-                <h2>Recettes Similaires de la Base de Données</h2>
-                <div className="recipes-grid">
-                  {prediction.similar_recipes.map((recipe, idx) => (
-                    <div key={idx} className="recipe-card-modern">
-                      <div className="recipe-header">
-                        <h3>{recipe.name}</h3>
-                        <div className="recipe-rating-badge">
-                          <span className="badge-stars">
-                            {[...Array(5)].map((_, i) => (
-                              <span key={i} className={i < Math.round(recipe.rating_stars) ? 'star-small filled' : 'star-small'}>★</span>
-                            ))}
-                          </span>
-                          <span className="badge-text">{recipe.rating_stars.toFixed(2)}</span>
-                        </div>
-                      </div>
-
-                      <div className="recipe-body">
-                        <div className="similarity-badge">
-                          {recipe.similarity_score}% Correspondance
-                        </div>
-                        <div className="ingredients-section">
-                          <strong>Ingrédients:</strong>
-                          <div className="ingredients-tags">
-                            {recipe.common_ingredients && recipe.common_ingredients.map((ing, i) => (
-                              <span key={`c-${i}`} className="ingredient-tag common">{ing}</span>
-                            ))}
-                            {recipe.other_ingredients && recipe.other_ingredients.map((ing, i) => (
-                              <span key={`o-${i}`} className="ingredient-tag">{ing}</span>
-                            ))}
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
+            {/* Similar recipes listing removed per request */}
           </div>
         )}
       </div>

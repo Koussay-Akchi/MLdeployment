@@ -32,12 +32,6 @@ try:
     with open(MODEL_DIR / "BO3" / "model_metadata.json", "r") as f:
         metadata_bo3 = json.load(f)
     
-    # Load recipe data for similar recipe recommendations
-    recipes_df = pd.read_csv(DATA_DIR / "recipes.csv")
-    # Cache ingredient parsing for faster lookups
-    recipes_df['parsed_ingredients'] = recipes_df['RecipeIngredientParts'].apply(lambda x: 
-        [ing.strip().lower() for ing in str(x).replace('c(', '').replace(')', '').replace('"', '').replace("'", "").split(',') if ing.strip()] if pd.notna(x) else []
-    )
     print("✓ BO3 model loaded successfully")
     print("✓ Recipe data cached for faster recommendations")
 except Exception as e:
@@ -49,7 +43,6 @@ try:
     model_bo1 = joblib.load(MODEL_DIR / "BO1" / "knn_model.pkl")
     scaler_bo1 = joblib.load(MODEL_DIR / "BO1" / "scaler_knn.pkl")
     X_scaled_bo1 = np.load(MODEL_DIR / "BO1" / "X_scaled.npy")
-    recipes_bo1_df = pd.read_csv(MODEL_DIR / "BO1" / "recipes_data.csv")
     
     with open(MODEL_DIR / "BO1" / "nutrition_cols.json", "r") as f:
         nutrition_cols_bo1 = json.load(f)
@@ -58,7 +51,6 @@ try:
         metadata_bo1 = json.load(f)
     
     print("✓ BO1 model loaded successfully")
-    print(f"✓ {len(recipes_bo1_df)} recipes available for recommendations")
 except Exception as e:
     print(f"⚠ Warning: Could not load BO1 model: {e}")
     model_bo1 = None
@@ -313,7 +305,7 @@ def predict_rating(features: RecipeFeatures):
         rating_stars = np.clip(rating_stars, 0, 5)
         
         # Find similar recipes based on ingredients
-        similar_recipes = find_similar_recipes(matched_ingredients, recipes_df, feature_names_bo3, top_n=6)
+        similar_recipes = []
         
         return {
             "predicted_rating": float(rating_stars),

@@ -1,0 +1,23 @@
+{
+  "model_type": "NearestNeighbors",
+  "task": "Recommendation (content-based)",
+  "features": {
+    "nutrition": [
+      "Calories",
+      "FatContent",
+      "SaturatedFatContent",
+      "CholesterolContent",
+      "SodiumContent",
+      "CarbohydrateContent",
+      "FiberContent",
+      "SugarContent",
+      "ProteinContent"
+    ]
+  },
+  "preprocessing": {
+    "scaler": "StandardScaler()"
+  },
+  "model_info": {
+    "n_neighbors": 5
+  }
+}

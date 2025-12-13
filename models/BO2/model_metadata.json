@@ -30,16 +30,16 @@
     "resampling": "ADASYN"
   },
   "best_params": {
-    "colsample_bytree": 0.6,
+    "colsample_bytree": 1.0,
     "learning_rate": 0.1,
     "max_depth": 4,
     "n_estimators": 200,
-    "subsample": 0.6
+    "subsample": 0.8
   },
-  "best_score": 0.9147071941330108,
+  "best_score": 0.9129951458494742,
   "metrics": {
-    "precision": 0.872728907086984,
-    "recall": 0.9336650082918739,
-    "f1_score": 0.9021691618143322
+    "precision": 0.8782109799157588,
+    "recall": 0.9038142620232172,
+    "f1_score": 0.8904563157388381
   }
 }

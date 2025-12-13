@@ -358,7 +358,7 @@ function App() {
                   <h3>Prédiction de Popularité de Recettes</h3>
                   <div className="dso-section">
                     <strong>DSO 2:</strong>
-                    <p>Classification binaire XGBoost pour prédire si une recette sera populaire basée sur les valeurs nutritionnelles, temps et note agrégée</p>
+                    <p>Classification binaire XGBoost pour prédire si une recette sera populaire basée sur les valeurs nutritionnelles et temps de préparation</p>
                   </div>
                   <button className="goto-btn" onClick={() => setActiveSection('bo2')}>Accéder à BO2 →</button>
                 </div>

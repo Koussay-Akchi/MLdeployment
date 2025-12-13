@@ -563,105 +563,140 @@ function App() {
                         Valeurs Nutritionnelles
                       </label>
                       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
-                        <input
-                          type="number"
-                          name="Calories"
-                          value={formDataBO2.Calories}
-                          onChange={handleInputChangeBO2}
-                          placeholder="Calories (kcal)"
-                          step="0.1"
-                          className="ingredients-textarea"
-                          style={{ height: '45px' }}
-                          required
-                        />
-                        <input
-                          type="number"
-                          name="FatContent"
-                          value={formDataBO2.FatContent}
-                          onChange={handleInputChangeBO2}
-                          placeholder="Fat Content (g)"
-                          step="0.1"
-                          className="ingredients-textarea"
-                          style={{ height: '45px' }}
-                          required
-                        />
-                        <input
-                          type="number"
-                          name="SaturatedFatContent"
-                          value={formDataBO2.SaturatedFatContent}
-                          onChange={handleInputChangeBO2}
-                          placeholder="Saturated Fat (g)"
-                          step="0.1"
-                          className="ingredients-textarea"
-                          style={{ height: '45px' }}
-                          required
-                        />
-                        <input
-                          type="number"
-                          name="CholesterolContent"
-                          value={formDataBO2.CholesterolContent}
-                          onChange={handleInputChangeBO2}
-                          placeholder="Cholesterol (mg)"
-                          step="0.1"
-                          className="ingredients-textarea"
-                          style={{ height: '45px' }}
-                          required
-                        />
-                        <input
-                          type="number"
-                          name="SodiumContent"
-                          value={formDataBO2.SodiumContent}
-                          onChange={handleInputChangeBO2}
-                          placeholder="Sodium (mg)"
-                          step="0.1"
-                          className="ingredients-textarea"
-                          style={{ height: '45px' }}
-                          required
-                        />
-                        <input
-                          type="number"
-                          name="CarbohydrateContent"
-                          value={formDataBO2.CarbohydrateContent}
-                          onChange={handleInputChangeBO2}
-                          placeholder="Carbohydrates (g)"
-                          step="0.1"
-                          className="ingredients-textarea"
-                          style={{ height: '45px' }}
-                          required
-                        />
-                        <input
-                          type="number"
-                          name="FiberContent"
-                          value={formDataBO2.FiberContent}
-                          onChange={handleInputChangeBO2}
-                          placeholder="Fiber (g)"
-                          step="0.1"
-                          className="ingredients-textarea"
-                          style={{ height: '45px' }}
-                          required
-                        />
-                        <input
-                          type="number"
-                          name="SugarContent"
-                          value={formDataBO2.SugarContent}
-                          onChange={handleInputChangeBO2}
-                          placeholder="Sugar (g)"
-                          step="0.1"
-                          className="ingredients-textarea"
-                          style={{ height: '45px' }}
-                          required
-                        />
-                        <input
-                          type="number"
-                          name="ProteinContent"
-                          value={formDataBO2.ProteinContent}
-                          onChange={handleInputChangeBO2}
-                          placeholder="Protein (g)"
-                          step="0.1"
-                          className="ingredients-textarea"
-                          style={{ height: '45px' }}
-                          required
-                        />
+                        <div className="input-with-label">
+                          <label className="metric-label">Calories <span className="trend down">▼</span></label>
+                          <input
+                            type="number"
+                            name="Calories"
+                            value={formDataBO2.Calories}
+                            onChange={handleInputChangeBO2}
+                            placeholder="Calories (kcal)"
+                            step="0.1"
+                            className="ingredients-textarea"
+                            style={{ height: '45px' }}
+                            required
+                          />
+                        </div>
+
+                        <div className="input-with-label">
+                          <label className="metric-label">Fat Content <span className="trend down double">▼▼</span></label>
+                          <input
+                            type="number"
+                            name="FatContent"
+                            value={formDataBO2.FatContent}
+                            onChange={handleInputChangeBO2}
+                            placeholder="Fat Content (g)"
+                            step="0.1"
+                            className="ingredients-textarea"
+                            style={{ height: '45px' }}
+                            required
+                          />
+                        </div>
+
+                        <div className="input-with-label">
+                          <label className="metric-label">Saturated Fat <span className="trend down">▼</span></label>
+                          <input
+                            type="number"
+                            name="SaturatedFatContent"
+                            value={formDataBO2.SaturatedFatContent}
+                            onChange={handleInputChangeBO2}
+                            placeholder="Saturated Fat (g)"
+                            step="0.1"
+                            className="ingredients-textarea"
+                            style={{ height: '45px' }}
+                            required
+                          />
+                        </div>
+
+                        <div className="input-with-label">
+                          <label className="metric-label">Cholesterol <span className="trend down">▼</span></label>
+                          <input
+                            type="number"
+                            name="CholesterolContent"
+                            value={formDataBO2.CholesterolContent}
+                            onChange={handleInputChangeBO2}
+                            placeholder="Cholesterol (mg)"
+                            step="0.1"
+                            className="ingredients-textarea"
+                            style={{ height: '45px' }}
+                            required
+                          />
+                        </div>
+
+                        <div className="input-with-label">
+                          <label className="metric-label">Sodium</label>
+                          <input
+                            type="number"
+                            name="SodiumContent"
+                            value={formDataBO2.SodiumContent}
+                            onChange={handleInputChangeBO2}
+                            placeholder="Sodium (mg)"
+                            step="0.1"
+                            className="ingredients-textarea"
+                            style={{ height: '45px' }}
+                            required
+                          />
+                        </div>
+
+                        <div className="input-with-label">
+                          <label className="metric-label">Carbohydrates <span className="trend down">▼</span></label>
+                          <input
+                            type="number"
+                            name="CarbohydrateContent"
+                            value={formDataBO2.CarbohydrateContent}
+                            onChange={handleInputChangeBO2}
+                            placeholder="Carbohydrates (g)"
+                            step="0.1"
+                            className="ingredients-textarea"
+                            style={{ height: '45px' }}
+                            required
+                          />
+                        </div>
+
+                        <div className="input-with-label">
+                          <label className="metric-label">Fiber <span className="trend down double">▼▼</span></label>
+                          <input
+                            type="number"
+                            name="FiberContent"
+                            value={formDataBO2.FiberContent}
+                            onChange={handleInputChangeBO2}
+                            placeholder="Fiber (g)"
+                            step="0.1"
+                            className="ingredients-textarea"
+                            style={{ height: '45px' }}
+                            required
+                          />
+                        </div>
+
+                        <div className="input-with-label">
+                          <label className="metric-label">Sugar</label>
+                          <input
+                            type="number"
+                            name="SugarContent"
+                            value={formDataBO2.SugarContent}
+                            onChange={handleInputChangeBO2}
+                            placeholder="Sugar (g)"
+                            step="0.1"
+                            className="ingredients-textarea"
+                            style={{ height: '45px' }}
+                            required
+                          />
+                        </div>
+
+                        <div className="input-with-label">
+                          <label className="metric-label">Protein <span className="trend up">▲</span></label>
+                          <input
+                            type="number"
+                            name="ProteinContent"
+                            value={formDataBO2.ProteinContent}
+                            onChange={handleInputChangeBO2}
+                            placeholder="Protein (g)"
+                            step="0.1"
+                            className="ingredients-textarea"
+                            style={{ height: '45px' }}
+                            required
+                          />
+                        </div>
                       </div>
                     </div>
 
@@ -670,45 +705,56 @@ function App() {
                         Temps (minutes)
                       </label>
                       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '10px' }}>
-                        <input
-                          type="number"
-                          name="PrepTime"
-                          value={formDataBO2.PrepTime}
-                          onChange={handleInputChangeBO2}
-                          placeholder="Prep Time"
-                          step="0.1"
-                          className="ingredients-textarea"
-                          style={{ height: '45px' }}
-                          required
-                        />
-                        <input
-                          type="number"
-                          name="CookTime"
-                          value={formDataBO2.CookTime}
-                          onChange={handleInputChangeBO2}
-                          placeholder="Cook Time"
-                          step="0.1"
-                          className="ingredients-textarea"
-                          style={{ height: '45px' }}
-                          required
-                        />
-                        <input
-                          type="number"
-                          name="TotalTime"
-                          value={formDataBO2.TotalTime}
-                          onChange={handleInputChangeBO2}
-                          placeholder="Total Time"
-                          step="0.1"
-                          className="ingredients-textarea"
-                          style={{ 
-                            height: '45px',
-                            background: '#f1f5f9',
-                            color: '#64748b',
-                            cursor: 'not-allowed'
-                          }}
-                          disabled
-                          readOnly
-                        />
+                        <div className="input-with-label">
+                          <label className="metric-label">Prep Time <span className="trend down">▼</span></label>
+                          <input
+                            type="number"
+                            name="PrepTime"
+                            value={formDataBO2.PrepTime}
+                            onChange={handleInputChangeBO2}
+                            placeholder="Prep Time"
+                            step="0.1"
+                            className="ingredients-textarea"
+                            style={{ height: '45px' }}
+                            required
+                          />
+                        </div>
+
+                        <div className="input-with-label">
+                          <label className="metric-label">Cook Time <span className="trend up">▲</span></label>
+                          <input
+                            type="number"
+                            name="CookTime"
+                            value={formDataBO2.CookTime}
+                            onChange={handleInputChangeBO2}
+                            placeholder="Cook Time"
+                            step="0.1"
+                            className="ingredients-textarea"
+                            style={{ height: '45px' }}
+                            required
+                          />
+                        </div>
+
+                        <div className="input-with-label">
+                          <label className="metric-label">Total Time</label>
+                          <input
+                            type="number"
+                            name="TotalTime"
+                            value={formDataBO2.TotalTime}
+                            onChange={handleInputChangeBO2}
+                            placeholder="Total Time"
+                            step="0.1"
+                            className="ingredients-textarea"
+                            style={{ 
+                              height: '45px',
+                              background: '#f1f5f9',
+                              color: '#64748b',
+                              cursor: 'not-allowed'
+                            }}
+                            disabled
+                            readOnly
+                          />
+                        </div>
                       </div>
                     </div>
 

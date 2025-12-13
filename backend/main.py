@@ -12,15 +12,15 @@ app = FastAPI(title="Recipe Rating Predictor API", version="1.0")
 # CORS middleware for React frontend
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000", "http://localhost:5173"],
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
 # Load models and metadata
-MODEL_DIR = Path(__file__).parent.parent / "models"
-DATA_DIR = Path(__file__).parent.parent
+MODEL_DIR = Path(__file__) / "models"
+DATA_DIR = Path(__file__)
 
 # BO3 - Random Forest Model (Rating Prediction - Ingredients Only)
 try:

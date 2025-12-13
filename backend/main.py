@@ -19,8 +19,8 @@ app.add_middleware(
 )
 
 # Load models and metadata
-MODEL_DIR = Path(__file__) / "models"
-DATA_DIR = Path(__file__)
+MODEL_DIR = Path(__file__).parent.parent / "models"
+DATA_DIR = Path(__file__).parent.parent
 
 # BO3 - Random Forest Model (Rating Prediction - Ingredients Only)
 try:

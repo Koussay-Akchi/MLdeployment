@@ -968,7 +968,7 @@ function App() {
                     <li>Entrez vos préférences culinaires moyennes</li>
                     <li>Le modèle SVM identifie votre profil parmi 4 segments</li>
                     <li>Obtenez des recommandations marketing personnalisées</li>
-                    <li>Précision du modèle: ~99-100%</li>
+                    <li>Précision du modèle: ~90%</li>
                   </ul>
                 </div>
               </div>
@@ -1090,7 +1090,7 @@ function App() {
                     </div>
                   </div>
                   <ul style={{ marginTop: '12px', paddingLeft: '20px' }}>
-                    <li>Classificateur XGBoost entraîné sur 6 types de cuisine</li>
+                    <li>Classificateur RandomForest entraîné sur 6 types de cuisine</li>
                     <li>Distribution de probabilité pour toutes les cuisines</li>
                     <li>Score de confiance pour la prédiction</li>
                   </ul>

@@ -1033,7 +1033,7 @@ function App() {
           <div className="bo3-section">
             <div className="section-header">
               <h1>Classificateur de Type de Cuisine</h1>
-              <p>Identifiez le type de cuisine à partir des ingrédients en utilisant le modèle XGBoost</p>
+              <p>Identifiez le type de cuisine à partir des ingrédients en utilisant le modèle RandomForest</p>
             </div>
 
             <div className="dual-container">

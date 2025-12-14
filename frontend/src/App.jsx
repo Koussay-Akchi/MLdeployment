@@ -7,24 +7,20 @@ const API_URL = 'https://mlbackend-fnjc.onrender.com'
 function App() {
   const [activeSection, setActiveSection] = useState('business')
   
-  // BO3 state
   const [formData, setFormData] = useState({
     ingredients: '',
   })
   const [prediction, setPrediction] = useState(null)
   const [loadingBO3, setLoadingBO3] = useState(false)
   
-  // BO1 state
   const [recipeName, setRecipeName] = useState('')
   const [recommendations, setRecommendations] = useState(null)
   const [loadingBO1, setLoadingBO1] = useState(false)
   
-  // BO5 state
   const [ingredientsBO5, setIngredientsBO5] = useState('')
   const [cuisineResult, setCuisineResult] = useState(null)
   const [loadingBO5, setLoadingBO5] = useState(false)
   
-  // BO4 state
   const [formDataBO4, setFormDataBO4] = useState({
     Avg_Rating: 4.0,
     Avg_Calories: 400,
@@ -36,7 +32,6 @@ function App() {
   const [profileResult, setProfileResult] = useState(null)
   const [loadingBO4, setLoadingBO4] = useState(false)
   
-  // BO2 state
   const [formDataBO2, setFormDataBO2] = useState({
     Calories: '',
     FatContent: '',
@@ -55,7 +50,6 @@ function App() {
   const [popularityResult, setPopularityResult] = useState(null)
   const [loadingBO2, setLoadingBO2] = useState(false)
 
-  // BO2 statistics data
   const bo2Statistics = [
     { Column: "Calories", Median: 361.9, Mean: 533.41 },
     { Column: "FatContent", Median: 17.0, Mean: 28.20 },
@@ -72,12 +66,10 @@ function App() {
     { Column: "AggregatedRating", Median: 1, Mean: 1 }
   ]
   
-  // Shared state
   const [error, setError] = useState(null)
   const [apiStatus, setApiStatus] = useState(null)
 
   useEffect(() => {
-    // Check API status on mount
     axios.get(`${API_URL}/`)
       .then(res => setApiStatus(res.data))
       .catch(() => setApiStatus({ status: 'offline' }))
@@ -197,12 +189,12 @@ function App() {
         [name]: numValue
       }
       
-      // Auto-calculate TotalTime when PrepTime or CookTime changes
+      
       if (name === 'PrepTime' || name === 'CookTime') {
         const prepTime = name === 'PrepTime' ? numValue : prev.PrepTime
         const cookTime = name === 'CookTime' ? numValue : prev.CookTime
         
-        // Convert to numbers, treating empty strings as 0
+        
         const prepTimeNum = (prepTime === '' || prepTime === null || prepTime === undefined) 
           ? 0 
           : (typeof prepTime === 'number' ? prepTime : parseFloat(prepTime) || 0)
@@ -250,10 +242,10 @@ function App() {
     setPopularityResult(null)
 
     try {
-      // Convert all values to numbers
+      
       const payload = {}
       for (const key in formDataBO2) {
-        // Skip TotalTime validation since it's auto-calculated
+        
         if (key === 'TotalTime') {
           continue
         }
@@ -271,7 +263,7 @@ function App() {
         }
       }
       
-      // Always set AggregatedRating to 5 and calculate TotalTime
+      
       payload.AggregatedRating = 5
       payload.TotalTime = (payload.PrepTime || 0) + (payload.CookTime || 0)
 
@@ -284,17 +276,16 @@ function App() {
     }
   }
 
-  // Helper function to get flag emoji for cuisine
   const getCuisineFlag = (cuisine) => {
     const flags = {
       'Italian': 'it',
       'Mexican': 'mx',
-      'Asian': 'cn',  // Using China flag for Asian
+      'Asian': 'cn',
       'Indian': 'in',
       'French': 'fr',
       'American': 'us'
     }
-    return flags[cuisine] || 'un'  // UN flag as default
+    return flags[cuisine] || 'un'
   }
 
   const renderPlaceholder = (boNumber, title) => (
@@ -309,7 +300,7 @@ function App() {
 
   return (
     <div className="App">
-      {/* Navbar */}
+            
       <nav className="navbar">
         <div className="nav-brand">
           <span className="brand-text">Hexateam</span>
@@ -333,64 +324,64 @@ function App() {
         </div>
       </nav>
 
-      {/* Main Content */}
+      
       <div className="main-content">
         {activeSection === 'business' && (
           <div className="business-section">
             <div className="trapezoid-grid">
-              {/* BO1 */}
+              
               <div className="trapezoid-card left">
                 <div className="trapezoid-content">
                   <div className="bo-badge">BO1</div>
                   <h3>Recommandation de Recettes Personnalisées</h3>
                   <div className="dso-section">
                     <strong>DSO 1:</strong>
-                    <p>Système de recommandation intelligent basé sur les valeurs nutritionnelles, ingrédients et catégories utilisant K-Nearest Neighbors</p>
+                    <p>Système de recommandation intelligent basé sur les valeurs nutritionnelles, ingrédients et catégories</p>
                   </div>
                   <button className="goto-btn" onClick={() => setActiveSection('bo1')}>Accéder à BO1 →</button>
                 </div>
               </div>
 
-              {/* BO2 */}
+              
               <div className="trapezoid-card right">
                 <div className="trapezoid-content">
                   <div className="bo-badge">BO2</div>
                   <h3>Prédiction de Popularité de Recettes</h3>
                   <div className="dso-section">
                     <strong>DSO 2:</strong>
-                    <p>Classification binaire XGBoost pour prédire si une recette sera populaire basée sur les valeurs nutritionnelles et temps de préparation</p>
+                    <p>Analyse et prediction de popularité basée sur valeurs nutritionnelles et temps de préparation</p>
                   </div>
                   <button className="goto-btn" onClick={() => setActiveSection('bo2')}>Accéder à BO2 →</button>
                 </div>
               </div>
 
-              {/* BO3 */}
+              
               <div className="trapezoid-card right">
                 <div className="trapezoid-content">
                   <div className="bo-badge">BO3</div>
                   <h3>Prédiction de Notes de Recettes</h3>
                   <div className="dso-section">
                     <strong>DSO 3:</strong>
-                    <p>Modèle de régression Random Forest pour prédire la note d'une recette à partir des ingrédients uniquement</p>
+                    <p>Analyse des ingrédients pour estimer la note d'une recette</p>
                   </div>
                   <button className="goto-btn" onClick={() => setActiveSection('bo3')}>Accéder à BO3 →</button>
                 </div>
               </div>
 
-              {/* BO4 */}
+              
               <div className="trapezoid-card left">
                 <div className="trapezoid-content">
                   <div className="bo-badge">BO4</div>
                   <h3>Segmentation et Profilage Utilisateur</h3>
                   <div className="dso-section">
                     <strong>DSO 4:</strong>
-                    <p>Classification SVM pour segmenter les utilisateurs en 4 profils distincts pour un marketing ciblé et personnalisé</p>
+                    <p>Segmentation intelligente des utilisateurs pour un marketing ciblé et personnalisé</p>
                   </div>
                   <button className="goto-btn" onClick={() => setActiveSection('bo4')}>Accéder à BO4 →</button>
                 </div>
               </div>
 
-              {/* BO5 */}
+              
               <div className="trapezoid-card right">
                 <div className="trapezoid-content">
                   <div className="bo-badge">BO5</div>
@@ -409,11 +400,11 @@ function App() {
           <div className="bo3-section">
             <div className="section-header">
               <h1>Système de Recommandation de Recettes</h1>
-              <p>Trouvez des recettes nutritionnellement similaires avec l'algorithme K-Nearest Neighbors</p>
+              <p>Trouvez des recettes adaptées à vos goûts et besoins nutritionnels</p>
             </div>
 
             <div className="dual-container">
-              {/* Left: Input */}
+              
               <div className="input-container">
                 <h2>Rechercher une Recette</h2>
                 <form onSubmit={handleRecommendSearch}>
@@ -440,15 +431,14 @@ function App() {
                     <strong>Comment ça marche:</strong>
                     <ul style={{ marginTop: '10px', paddingLeft: '20px' }}>
                       <li>Entrez un nom de recette pour rechercher</li>
-                      <li>KNN trouve les 5 recettes les plus similaires nutritionnellement</li>
-                      <li>Similarité basée sur 9 caractéristiques nutritionnelles</li>
-                      <li>Résultats avec distance & pourcentage de similarité</li>
+                      <li>Notre moteur suggère des recettes proches de votre choix</li>
+                      <li>Basé sur le profil nutritionnel et les ingrédients</li>
                     </ul>
                   </div>
                 </form>
               </div>
 
-              {/* Right: Source Recipe */}
+              
               <div className="results-container">
                 <div style={{ 
                   display: 'flex', 
@@ -494,7 +484,7 @@ function App() {
                       </div>
                     </div>
 
-                    {/* Source Recipe Nutrition */}
+                    
                     <div style={{ marginTop: '20px', padding: '15px', background: '#f8fafc', borderRadius: '8px' }}>
                       <strong style={{ fontSize: '0.9rem', color: '#475569' }}>Nutrition de la Source:</strong>
                       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '10px', marginTop: '10px', fontSize: '0.85rem' }}>
@@ -511,7 +501,7 @@ function App() {
               </div>
             </div>
 
-            {/* Similar Recipes - Full Width Below */}
+            
             {recommendations && recommendations.recommendations && recommendations.recommendations.length > 0 && (
               <div className="similar-section">
                 <h2>Recettes Similaires Recommandées</h2>
@@ -552,11 +542,10 @@ function App() {
           <div className="bo3-section">
             <div className="section-header">
               <h1>Prédicteur de Popularité de Recettes</h1>
-              <p>Prédisez si une recette sera populaire en utilisant le modèle XGBoost de classification binaire</p>
+              <p>Prédisez si une recette sera populaire selon des tendances observées</p>
             </div>
 
             <div className="dual-container">
-              {/* Left: Input */}
               <div className="input-container">
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
                   <h2 style={{ margin: 0 }}>Caractéristiques de la Recette</h2>
@@ -823,14 +812,12 @@ function App() {
                   <strong style={{ color: '#10b981' }}>Comment ça marche:</strong>
                   <ul style={{ marginTop: '8px', paddingLeft: '20px' }}>
                     <li>Entrez les valeurs nutritionnelles et temps de préparation de la recette</li>
-                    <li>Le modèle XGBoost prédit si la recette sera populaire (classification binaire)</li>
-                    <li>Obtenez la probabilité de popularité avec un score de confiance</li>
-                    <li>Modèle entraîné avec ADASYN pour gérer le déséquilibre des classes</li>
+                      <li>Notre système estime si une recette sera populaire</li>
+                      <li>Obtenez la probabilité de popularité avec un score de confiance</li>
                   </ul>
                 </div>
               </div>
 
-              {/* Right: Results */}
               <div className="results-container">
                 <h2>Résultats de Prédiction</h2>
                 
@@ -871,7 +858,7 @@ function App() {
                       </div>
                     </div>
 
-                    {/* Probabilities */}
+                    
                     <div style={{ marginTop: '20px', padding: '15px', background: '#f8fafc', borderRadius: '8px' }}>
                       <strong style={{ fontSize: '0.9rem', color: '#475569' }}>Probabilités:</strong>
                       <div style={{ marginTop: '10px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
@@ -906,11 +893,11 @@ function App() {
                       </div>
                     </div>
 
-                    {/* Model Performance Info */}
+                    
                     <div style={{ marginTop: '20px', padding: '15px', background: '#f8fafc', borderRadius: '8px', fontSize: '0.85rem' }}>
-                      <strong style={{ color: '#475569' }}>Performance du Modèle:</strong>
+                      <strong style={{ color: '#475569' }}>Note sur la fiabilité:</strong>
                       <div style={{ marginTop: '8px', color: '#64748b' }}>
-                        <div>Précision: 87.8% | Rappel: 90.4% | F1-Score: 89.0%</div>
+                        <div>Les résultats sont basés sur l'analyse d'un large ensemble de recettes.</div>
                       </div>
                     </div>
                   </div>
@@ -924,7 +911,7 @@ function App() {
           <div className="bo3-section">
             <div className="section-header">
               <h1>Profilage Utilisateur et Marketing Ciblé</h1>
-              <p>Identifiez votre profil utilisateur avec le modèle SVM pour des recommandations marketing personnalisées</p>
+              <p>Identifiez votre profil culinaire pour des recommandations personnalisées</p>
             </div>
 
             <div className="dual-container">
@@ -966,9 +953,8 @@ function App() {
                   <strong style={{ color: '#10b981' }}>Comment ça marche:</strong>
                   <ul style={{ marginTop: '8px', paddingLeft: '20px' }}>
                     <li>Entrez vos préférences culinaires moyennes</li>
-                    <li>Le modèle SVM identifie votre profil parmi 4 segments</li>
+                    <li>Nous identifions le profil qui vous correspond le mieux</li>
                     <li>Obtenez des recommandations marketing personnalisées</li>
-                    <li>Précision du modèle: ~90%</li>
                   </ul>
                 </div>
               </div>
@@ -1010,18 +996,7 @@ function App() {
                       <p style={{ marginTop: '8px', fontSize: '0.85rem', color: '#065f46', lineHeight: '1.5' }}>{profileResult.marketing_strategy}</p>
                     </div>
                     
-                    {profileResult.model_performance && (
-                      <div style={{ marginTop: '15px', padding: '12px', background: 'white', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.85rem', color: '#64748b' }}>
-                          <span>Précision du Modèle:</span>
-                          <span style={{ color: '#10b981', fontWeight: '600' }}>{profileResult.model_performance.accuracy}%</span>
-                        </div>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.85rem', color: '#64748b', marginTop: '6px' }}>
-                          <span>F1-Score:</span>
-                          <span style={{ color: '#10b981', fontWeight: '600' }}>{profileResult.model_performance.f1_score}</span>
-                        </div>
-                      </div>
-                    )}
+                    
                   </div>
                 )}
               </div>
@@ -1033,11 +1008,10 @@ function App() {
           <div className="bo3-section">
             <div className="section-header">
               <h1>Classificateur de Type de Cuisine</h1>
-              <p>Identifiez le type de cuisine à partir des ingrédients en utilisant le modèle RandomForest</p>
+              <p>Identifiez le type de cuisine à partir des ingrédients</p>
             </div>
 
             <div className="dual-container">
-              {/* Left: Input */}
               <div className="input-container">
                 <h2>Entrez les Ingrédients</h2>
                 <form onSubmit={handleCuisineClassification}>
@@ -1090,14 +1064,13 @@ function App() {
                     </div>
                   </div>
                   <ul style={{ marginTop: '12px', paddingLeft: '20px' }}>
-                    <li>Classificateur RandomForest entraîné sur 6 types de cuisine</li>
-                    <li>Distribution de probabilité pour toutes les cuisines</li>
+                    <li>Formé sur une large collection de recettes</li>
+                    <li>Affiche une distribution de confiance pour chaque type</li>
                     <li>Score de confiance pour la prédiction</li>
                   </ul>
                 </div>
               </div>
 
-              {/* Right: Results */}
               <div className="results-container">
                 <h2>Résultats de Classification</h2>
                 
@@ -1133,7 +1106,7 @@ function App() {
                       </div>
                     </div>
 
-                    {/* Ingredients Info */}
+                    
                     <div style={{ marginTop: '20px', padding: '15px', background: '#f8fafc', borderRadius: '8px' }}>
                       <strong style={{ fontSize: '0.9rem', color: '#475569' }}>Analyse des Ingrédients:</strong>
                       <div style={{ marginTop: '10px', fontSize: '0.85rem' }}>
@@ -1148,7 +1121,7 @@ function App() {
                       </div>
                     </div>
 
-                    {/* Top 3 Predictions */}
+                    
                     {cuisineResult.top_3_predictions && cuisineResult.top_3_predictions.length > 0 && (
                       <div style={{ marginTop: '20px' }}>
                         <strong style={{ fontSize: '0.9rem', color: '#475569' }}>Top Prédictions:</strong>
@@ -1194,7 +1167,7 @@ function App() {
               </div>
             </div>
 
-            {/* All Probabilities - Full Width Below */}
+            
             {cuisineResult && cuisineResult.all_probabilities && (
               <div className="similar-section">
                 <h2>Distribution de Probabilité</h2>
@@ -1268,11 +1241,11 @@ function App() {
           <div className="bo3-section">
             <div className="section-header">
               <h1>Prédicteur de Notes de Recettes</h1>
-              <p>Entrez vos ingrédients pour prédire la note en utilisant le modèle Random Forest</p>
+              <p>Entrez vos ingrédients pour prédire la note de la recette</p>
             </div>
 
             <div className="dual-container">
-              {/* Left: Input */}
+              
               <div className="input-container">
                 <h2>Ingrédients de la Recette</h2>
                 <form onSubmit={handleSubmit}>
@@ -1301,12 +1274,12 @@ function App() {
                   <strong style={{ color: '#10b981' }}>Comment ça marche:</strong>
                   <ul style={{ marginTop: '8px', paddingLeft: '20px' }}>
                     <li>Entrez une liste d'ingrédients que vous avez</li>
-                    <li>Notre modèle Random Forest prédit la note de la recette (0-5 étoiles)</li>
+                    <li>Notre système prédit la note de la recette (0-5 étoiles)</li>
                   </ul>
                 </div>
               </div>
 
-              {/* Right: Results */}
+              
               <div className="results-container">
                 <h2>Résultats de Prédiction</h2>
                 
@@ -1353,7 +1326,7 @@ function App() {
               </div>
             </div>
 
-            {/* Similar recipes listing removed per request */}
+            
           </div>
         )}
       </div>

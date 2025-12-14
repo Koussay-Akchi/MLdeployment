@@ -32,11 +32,20 @@ try:
     with open(MODEL_DIR / "BO3" / "model_metadata.json", "r") as f:
         metadata_bo3 = json.load(f)
     
-    print("✓ BO3 model loaded successfully")
-    print("✓ Recipe data cached for faster recommendations")
+    # Load BO3 ingredients dataframe
+    recipes_bo3_df = None
+    df_bo3_csv = MODEL_DIR / "BO3" / "ingredients_df_sample.csv"
+    if df_bo3_csv.exists():
+        recipes_bo3_df = pd.read_csv(df_bo3_csv)
+        print("✓ BO3 model loaded successfully")
+        print(f"✓ {len(recipes_bo3_df)} recipes loaded from ingredients_df_sample.csv")
+    else:
+        print("✓ BO3 model loaded successfully")
+        print("⚠ Warning: ingredients_df_sample.csv not found in BO3 folder")
 except Exception as e:
     print(f"⚠ Warning: Could not load BO3 model: {e}")
     model_bo3 = None
+    recipes_bo3_df = None
 
 # BO1 - KNN Model (Recipe Recommendation)
 try:
@@ -318,8 +327,8 @@ def predict_rating(features: RecipeFeatures):
         # Clip to valid rating range [0, 5]
         rating_stars = np.clip(rating_stars, 0, 5)
         
-        # Find similar recipes based on ingredients
-        similar_recipes = [find_similar_recipes(matched_ingredients, recipes_bo1_df, feature_names_bo3, top_n=6)]
+        # Find similar recipes based on ingredients using BO3 ingredients dataframe
+        similar_recipes = find_similar_recipes_by_ingredients(matched_ingredients, recipes_bo3_df, feature_names_bo3, top_n=5)
         
         return {
             "predicted_rating": float(rating_stars),
@@ -332,22 +341,124 @@ def predict_rating(features: RecipeFeatures):
         raise HTTPException(status_code=500, detail=f"Prediction error: {str(e)}")
 
 
-def find_similar_recipes(user_ingredients, df, all_features, top_n=6):
-    """Find recipes with similar ingredients"""
+def parse_r_ingredients(ingredients_str):
+    """
+    Parse R format ingredients string: c("ingredient1", "ingredient2", ...)
+    Returns a list of ingredient names in lowercase
+    """
+    if pd.isna(ingredients_str) or not isinstance(ingredients_str, str):
+        return []
+    
+    try:
+        # Remove the c( and ) wrapper
+        ingredients_str = ingredients_str.strip()
+        if ingredients_str.startswith('c('):
+            ingredients_str = ingredients_str[2:]
+        if ingredients_str.endswith(')'):
+            ingredients_str = ingredients_str[:-1]
+        
+        # Split by comma, but handle quoted strings properly
+        import re
+        # Find all quoted strings
+        matches = re.findall(r'"([^"]*)"', ingredients_str)
+        # Convert to lowercase and strip whitespace
+        ingredients = [ing.strip().lower() for ing in matches if ing.strip()]
+        return ingredients
+    except Exception as e:
+        print(f"Error parsing ingredients: {e}")
+        return []
+
+
+def find_similar_recipes_by_ingredients(user_ingredients, df, all_features, top_n=5):
+    """
+    Find recipes from ingredients_df_sample.csv where RecipeIngredientParts contains user ingredients
+    Returns top N recipes with most matching ingredients
+    """
+    if df is None or len(user_ingredients) == 0:
+        return []
+    
+    try:
+        # Check if RecipeIngredientParts column exists
+        if 'RecipeIngredientParts' not in df.columns:
+            print("⚠ RecipeIngredientParts column not found, using fallback")
+            return find_similar_recipes_fallback(user_ingredients, df, top_n)
+        
+        user_ing_set = set([ing.lower() for ing in user_ingredients])
+        recipe_matches = []
+        
+        for idx, row in df.iterrows():
+            # Parse the RecipeIngredientParts column
+            ingredients_str = row.get('RecipeIngredientParts', '')
+            recipe_ingredients = parse_r_ingredients(ingredients_str)
+            
+            if not recipe_ingredients:
+                continue
+            
+            # Find matching ingredients (case-insensitive)
+            matched_ingredients = []
+            for user_ing in user_ing_set:
+                # Check for exact match or substring match
+                for recipe_ing in recipe_ingredients:
+                    if user_ing == recipe_ing or user_ing in recipe_ing or recipe_ing in user_ing:
+                        matched_ingredients.append(recipe_ing)
+                        break
+            
+            if len(matched_ingredients) > 0:
+                # Get recipe name and rating
+                recipe_name = row.get('Name', 'Unknown Recipe')
+                rating = row.get('AggregatedRating', 0)
+                
+                # Convert rating if normalized (0-1) to stars (0-5)
+                if isinstance(rating, (int, float)):
+                    if rating <= 1.0 and rating > 0:
+                        rating_stars = rating * 5.0
+                    else:
+                        rating_stars = float(rating) if not pd.isna(rating) else 0.0
+                else:
+                    rating_stars = 0.0
+                
+                # Separate common and other ingredients
+                common_ings = matched_ingredients
+                other_ings = [ing for ing in recipe_ingredients if ing not in matched_ingredients]
+                
+                # Calculate similarity score as percentage of user ingredients found
+                similarity_score = (len(matched_ingredients) / len(user_ingredients)) * 100 if len(user_ingredients) > 0 else 0
+                
+                recipe_matches.append({
+                    'name': recipe_name,
+                    'rating_stars': rating_stars,
+                    'common_ingredients': common_ings,
+                    'other_ingredients': other_ings,
+                    'similarity_score': round(similarity_score, 1)
+                })
+        
+        # Sort by number of matches (descending), then by rating (descending)
+        recipe_matches.sort(key=lambda x: (len(x['common_ingredients']), x['rating_stars']), reverse=True)
+        
+        return recipe_matches[:top_n]
+    
+    except Exception as e:
+        print(f"Error finding similar recipes by ingredients: {e}")
+        import traceback
+        traceback.print_exc()
+        # Fallback to old method
+        return find_similar_recipes_fallback(user_ingredients, df, top_n)
+
+
+def find_similar_recipes_fallback(user_ingredients, df, top_n=5):
+    """Fallback method using parsed_ingredients if ingredient columns not available"""
     if df is None or len(user_ingredients) == 0:
         return []
     
     try:
         user_ing_set = set(user_ingredients)
         
-        # Calculate similarity for each recipe (limit to first 1000 for speed)
         recipe_similarities = []
         for idx, row in df.head(1000).iterrows():
             parsed_ings = row.get('parsed_ingredients', [])
             if not parsed_ings:
                 continue
             
-            # Find matching ingredients
             matches = []
             for user_ing in user_ing_set:
                 for recipe_ing in parsed_ings:
@@ -356,12 +467,9 @@ def find_similar_recipes(user_ingredients, df, all_features, top_n=6):
                         break
             
             if len(matches) > 0:
-                # Calculate percentage: matched ingredients / total recipe ingredients
-                # Shows what portion of the recipe you can make with your ingredients
-                similarity = (len(matches) / len(parsed_ings)) * 100
-                similarity = min(similarity, 100)  # Cap at 100%
+                similarity = (len(matches) / len(parsed_ings)) * 100 if len(parsed_ings) > 0 else 0
+                similarity = min(similarity, 100)
                 
-                # Organize ingredients: common first, then others
                 common_ings = []
                 other_ings = []
                 
@@ -372,21 +480,25 @@ def find_similar_recipes(user_ingredients, df, all_features, top_n=6):
                     else:
                         other_ings.append(recipe_ing)
                 
+                rating = row.get('AggregatedRating', 0)
+                if isinstance(rating, (int, float)) and rating <= 1.0:
+                    rating_stars = rating * 5.0
+                else:
+                    rating_stars = float(rating) if not pd.isna(rating) else 0.0
+                
                 recipe_similarities.append({
                     'name': row.get('Name', 'Unknown Recipe'),
-                    'rating_stars': float(row.get('AggregatedRating', 0)) if not pd.isna(row.get('AggregatedRating')) else 0.0,
+                    'rating_stars': rating_stars,
                     'common_ingredients': common_ings,
                     'other_ingredients': other_ings,
                     'similarity_score': round(similarity, 1)
                 })
         
-        # Sort by similarity, then by rating
         recipe_similarities.sort(key=lambda x: (x['similarity_score'], x['rating_stars']), reverse=True)
-        
         return recipe_similarities[:top_n]
     
     except Exception as e:
-        print(f"Error finding similar recipes: {e}")
+        print(f"Error in fallback method: {e}")
         return []
 
 

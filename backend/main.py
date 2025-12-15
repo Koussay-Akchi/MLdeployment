@@ -9,7 +9,7 @@ from pathlib import Path
 
 app = FastAPI(title="Recipe Rating Predictor API", version="1.0")
 
-# CORS middleware for React frontend
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -18,11 +18,11 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Load models and metadata
+
 MODEL_DIR = Path(__file__).parent.parent / "models"
 DATA_DIR = Path(__file__).parent.parent
 
-# BO3 - Random Forest Model (Rating Prediction - Ingredients Only)
+
 try:
     model_bo3 = joblib.load(MODEL_DIR / "BO3" / "random_forest_rating_model.pkl")
     
@@ -32,22 +32,22 @@ try:
     with open(MODEL_DIR / "BO3" / "model_metadata.json", "r") as f:
         metadata_bo3 = json.load(f)
     
-    # Load BO3 ingredients dataframe
+    
     recipes_bo3_df = None
     df_bo3_csv = MODEL_DIR / "BO3" / "ingredients_df_sample.csv"
     if df_bo3_csv.exists():
         recipes_bo3_df = pd.read_csv(df_bo3_csv)
-        print("✓ BO3 model loaded successfully")
-        print(f"✓ {len(recipes_bo3_df)} recipes loaded from ingredients_df_sample.csv")
+        print("ok : BO3 model loaded successfully")
+        print(f"ok : {len(recipes_bo3_df)} recipes loaded from ingredients_df_sample.csv")
     else:
-        print("✓ BO3 model loaded successfully")
-        print("⚠ Warning: ingredients_df_sample.csv not found in BO3 folder")
+        print("ok : BO3 model loaded successfully")
+        print("Warning: ingredients_df_sample.csv not found in BO3 folder")
 except Exception as e:
-    print(f"⚠ Warning: Could not load BO3 model: {e}")
+    print(f"Warning: Could not load BO3 model: {e}")
     model_bo3 = None
     recipes_bo3_df = None
 
-# BO1 - KNN Model (Recipe Recommendation)
+
 try:
     model_bo1 = joblib.load(MODEL_DIR / "BO1" / "knn_model.pkl")
     scaler_bo1 = joblib.load(MODEL_DIR / "BO1" / "scaler_knn.pkl")
@@ -69,17 +69,17 @@ try:
     with open(MODEL_DIR / "BO1" / "model_metadata.json", "r") as f:
         metadata_bo1 = json.load(f)
     
-    print("✓ BO1 model loaded successfully")
+    print("ok : BO1 model loaded successfully")
     if recipes_bo1_df is not None:
-        print(f"✓ {len(recipes_bo1_df)} recipes available for recommendations")
+        print(f"ok : {len(recipes_bo1_df)} recipes available for recommendations")
     else:
-        print("⚠ Warning: BO1 recipes dataframe not available")
+        print("Warning: BO1 recipes dataframe not available")
 except Exception as e:
-    print(f"⚠ Warning: Could not load BO1 model: {e}")
+    print(f"Warning: Could not load BO1 model: {e}")
     model_bo1 = None
     recipes_bo1_df = None
 
-# BO5 - XGBoost Cuisine Classifier
+
 try:
     model_bo5 = joblib.load(MODEL_DIR / "BO5" / "xgb_cuisine_model.pkl")
     label_encoder_bo5 = joblib.load(MODEL_DIR / "BO5" / "label_encoder.pkl")
@@ -93,13 +93,13 @@ try:
     with open(MODEL_DIR / "BO5" / "model_metadata.json", "r") as f:
         metadata_bo5 = json.load(f)
     
-    print("✓ BO5 model loaded successfully")
-    print(f"✓ {len(cuisine_types_bo5)} cuisine types | {metadata_bo5.get('n_features', 0)} features")
+    print("ok : BO5 model loaded successfully")
+    print(f"ok : {len(cuisine_types_bo5)} cuisine types | {metadata_bo5.get('n_features', 0)} features")
 except Exception as e:
-    print(f"⚠ Warning: Could not load BO5 model: {e}")
+    print(f"Warning: Could not load BO5 model: {e}")
     model_bo5 = None
 
-# BO2 - XGBoost Popularity Classifier
+
 try:
     model_bo2 = joblib.load(MODEL_DIR / "BO2" / "xgb_model_bo2.pkl")
     scaler_bo2 = joblib.load(MODEL_DIR / "BO2" / "scaler_bo2.pkl")
@@ -117,13 +117,13 @@ try:
     with open(MODEL_DIR / "BO2" / "model_metadata.json", "r") as f:
         metadata_bo2 = json.load(f)
     
-    print("✓ BO2 model loaded successfully")
-    print(f"✓ Binary classification model | {len(feature_names_bo2)} features")
+    print("ok : BO2 model loaded successfully")
+    print(f"ok : Binary classification model | {len(feature_names_bo2)} features")
 except Exception as e:
-    print(f"⚠ Warning: Could not load BO2 model: {e}")
+    print(f"Warning: Could not load BO2 model: {e}")
     model_bo2 = None
 
-# BO4 - SVM User Profiling Model
+
 try:
     model_bo4 = joblib.load(MODEL_DIR / "BO4" / "svm_user_profiling_model.pkl")
     scaler_bo4 = joblib.load(MODEL_DIR / "BO4" / "scaler.pkl")
@@ -137,10 +137,10 @@ try:
     with open(MODEL_DIR / "BO4" / "model_metadata.json", "r", encoding='utf-8') as f:
         metadata_bo4 = json.load(f)
     
-    print("✓ BO4 model loaded successfully")
-    print(f"✓ SVM User Profiling | {metadata_bo4.get('n_clusters', 0)} clusters | Accuracy: {metadata_bo4['performance']['accuracy']:.2%}")
+    print("ok : BO4 model loaded successfully")
+    print(f"ok : SVM User Profiling | {metadata_bo4.get('n_clusters', 0)} clusters | Accuracy: {metadata_bo4['performance']['accuracy']:.2%}")
 except Exception as e:
-    print(f"⚠ Warning: Could not load BO4 model: {e}")
+    print(f"Warning: Could not load BO4 model: {e}")
     model_bo4 = None
 
 
@@ -263,26 +263,26 @@ def predict_rating(features: RecipeFeatures):
             detail="Model not loaded. Please run the export cells in the notebook first."
         )
     
-    # Convert input to dictionary
+    
     input_dict = features.dict()
     
-    # Get ingredients
+    
     ingredients = [ing.strip().lower() for ing in input_dict.get('ingredients', [])]
     
-    # Validate: Need at least 3 ingredients
+    
     if len(ingredients) < 3:
         raise HTTPException(
             status_code=400, 
             detail="Please provide at least 3 ingredients for a recipe rating"
         )
     
-    # Initialize feature vector with zeros
+    
     feature_vector = np.zeros(len(feature_names_bo3))
     
-    # Map features to their positions
+    
     feature_idx = {name: idx for idx, name in enumerate(feature_names_bo3)}
     
-    # Only encode ingredients that actually match
+    
     matched_ingredients = []
     unmatched_ingredients = []
     for ing in ingredients:
@@ -292,7 +292,7 @@ def predict_rating(features: RecipeFeatures):
         else:
             unmatched_ingredients.append(ing)
     
-    # Validate: Check if enough valid ingredients (at least 50% should match)
+    
     match_ratio = len(matched_ingredients) / len(ingredients) if len(ingredients) > 0 else 0
     
     if match_ratio < 0.5 or len(matched_ingredients) < 2:
@@ -305,29 +305,29 @@ def predict_rating(features: RecipeFeatures):
         feature_array = feature_vector.reshape(1, -1)
         prediction = model_bo3.predict(feature_array)[0]
         
-        # Model outputs normalized values (0-1), convert to 5-star rating
+        
         rating_stars = prediction * 5.0
         
-        # Add variance based on matched ingredients (model tends to predict ~4.56 for everything)
-        # Adjust rating based on ingredient count and quality
+        
+        
         ingredient_adjustment = 0.0
         if len(matched_ingredients) < 3:
-            ingredient_adjustment = -0.5  # Very few ingredients = lower rating
+            ingredient_adjustment = -0.5  
         elif len(matched_ingredients) < 5:
-            ingredient_adjustment = -0.2  # Few ingredients = slight penalty
+            ingredient_adjustment = -0.2  
         elif len(matched_ingredients) > 15:
-            ingredient_adjustment = 0.2   # Many ingredients = slight boost
+            ingredient_adjustment = 0.2   
         
-        # Add small random variation to break monotony (model learned to predict mean)
+        
         import random
         random_variation = random.uniform(-0.15, 0.15)
         
         rating_stars = rating_stars + ingredient_adjustment + random_variation
         
-        # Clip to valid rating range [0, 5]
+        
         rating_stars = np.clip(rating_stars, 0, 5)
         
-        # Find similar recipes based on ingredients using BO3 ingredients dataframe
+        
         similar_recipes = find_similar_recipes_by_ingredients(matched_ingredients, recipes_bo3_df, feature_names_bo3, top_n=5)
         
         return {
@@ -350,18 +350,18 @@ def parse_r_ingredients(ingredients_str):
         return []
     
     try:
-        # Remove the c( and ) wrapper
+        
         ingredients_str = ingredients_str.strip()
         if ingredients_str.startswith('c('):
             ingredients_str = ingredients_str[2:]
         if ingredients_str.endswith(')'):
             ingredients_str = ingredients_str[:-1]
         
-        # Split by comma, but handle quoted strings properly
+        
         import re
-        # Find all quoted strings
+        
         matches = re.findall(r'"([^"]*)"', ingredients_str)
-        # Convert to lowercase and strip whitespace
+        
         ingredients = [ing.strip().lower() for ing in matches if ing.strip()]
         return ingredients
     except Exception as e:
@@ -378,37 +378,37 @@ def find_similar_recipes_by_ingredients(user_ingredients, df, all_features, top_
         return []
     
     try:
-        # Check if RecipeIngredientParts column exists
+        
         if 'RecipeIngredientParts' not in df.columns:
-            print("⚠ RecipeIngredientParts column not found, using fallback")
+            print("RecipeIngredientParts column not found, using fallback")
             return find_similar_recipes_fallback(user_ingredients, df, top_n)
         
         user_ing_set = set([ing.lower() for ing in user_ingredients])
         recipe_matches = []
         
         for idx, row in df.iterrows():
-            # Parse the RecipeIngredientParts column
+            
             ingredients_str = row.get('RecipeIngredientParts', '')
             recipe_ingredients = parse_r_ingredients(ingredients_str)
             
             if not recipe_ingredients:
                 continue
             
-            # Find matching ingredients (case-insensitive)
+            
             matched_ingredients = []
             for user_ing in user_ing_set:
-                # Check for exact match or substring match
+                
                 for recipe_ing in recipe_ingredients:
                     if user_ing == recipe_ing or user_ing in recipe_ing or recipe_ing in user_ing:
                         matched_ingredients.append(recipe_ing)
                         break
             
             if len(matched_ingredients) > 0:
-                # Get recipe name and rating
+                
                 recipe_name = row.get('Name', 'Unknown Recipe')
                 rating = row.get('AggregatedRating', 0)
                 
-                # Convert rating if normalized (0-1) to stars (0-5)
+                
                 if isinstance(rating, (int, float)):
                     if rating <= 1.0 and rating > 0:
                         rating_stars = rating * 5.0
@@ -417,11 +417,11 @@ def find_similar_recipes_by_ingredients(user_ingredients, df, all_features, top_
                 else:
                     rating_stars = 0.0
                 
-                # Separate common and other ingredients
+                
                 common_ings = matched_ingredients
                 other_ings = [ing for ing in recipe_ingredients if ing not in matched_ingredients]
                 
-                # Calculate similarity score as percentage of user ingredients found
+                
                 similarity_score = (len(matched_ingredients) / len(user_ingredients)) * 100 if len(user_ingredients) > 0 else 0
                 
                 recipe_matches.append({
@@ -432,7 +432,7 @@ def find_similar_recipes_by_ingredients(user_ingredients, df, all_features, top_
                     'similarity_score': round(similarity_score, 1)
                 })
         
-        # Sort by number of matches (descending), then by rating (descending)
+        
         recipe_matches.sort(key=lambda x: (len(x['common_ingredients']), x['rating_stars']), reverse=True)
         
         return recipe_matches[:top_n]
@@ -441,7 +441,7 @@ def find_similar_recipes_by_ingredients(user_ingredients, df, all_features, top_
         print(f"Error finding similar recipes by ingredients: {e}")
         import traceback
         traceback.print_exc()
-        # Fallback to old method
+        
         return find_similar_recipes_fallback(user_ingredients, df, top_n)
 
 
@@ -513,9 +513,9 @@ def recommend_recipes(request: RecipeSearchRequest):
     
     try:
         recipe_name = request.recipe_name.strip()
-        n_recommendations = min(request.n_recommendations, 10)  # Max 10 recommendations
+        n_recommendations = min(request.n_recommendations, 10)  
         
-        # Find the recipe in the database
+        
         recipe_match = recipes_bo1_df[
             recipes_bo1_df['Name'].str.contains(recipe_name, case=False, na=False)
         ]
@@ -526,30 +526,30 @@ def recommend_recipes(request: RecipeSearchRequest):
                 detail=f"Recipe '{recipe_name}' not found. Try searching with different keywords."
             )
         
-        # Get the first match
+        
         recipe_idx = recipe_match.index[0]
         recipe_data = X_scaled_bo1[recipe_idx].reshape(1, -1)
         
-        # Get the source recipe details
+        
         source_recipe = recipes_bo1_df.iloc[recipe_idx]
         
-        # Find K nearest neighbors (excluding the recipe itself)
+        
         distances, indices = model_bo1.kneighbors(recipe_data, n_neighbors=n_recommendations + 1)
         
-        # Skip the first result (the recipe itself) and get the rest
+        
         similar_indices = indices[0][1:]
         similar_distances = distances[0][1:]
         
-        # Build recommendations
+        
         recommendations = []
         for idx, distance in zip(similar_indices, similar_distances):
             recipe = recipes_bo1_df.iloc[idx]
             
-            # Calculate similarity score (1 / (1 + distance))
+            
             similarity = 1 / (1 + distance)
             similarity_percentage = similarity * 100
             
-            # Get nutritional values
+            
             nutrition = {col: float(recipe[col]) for col in nutrition_cols_bo1}
             
             recommendations.append({
@@ -568,7 +568,7 @@ def recommend_recipes(request: RecipeSearchRequest):
                 }
             })
         
-        # Get source recipe nutrition
+        
         source_nutrition = {col: float(source_recipe[col]) for col in nutrition_cols_bo1}
         
         return {
@@ -606,10 +606,10 @@ def predict_popularity(request: PopularityPredictionRequest):
         )
     
     try:
-        # Convert request to dictionary
+        
         input_dict = request.dict()
         
-        # Create feature array in the correct order
+        
         feature_array = np.array([[
             input_dict['Calories'],
             input_dict['FatContent'],
@@ -626,17 +626,17 @@ def predict_popularity(request: PopularityPredictionRequest):
             input_dict['AggregatedRating']
         ]])
         
-        # Apply imputation (in case of missing values)
+        
         feature_array = imputer_bo2.transform(feature_array)
         
-        # Apply scaling
+        
         feature_array_scaled = scaler_bo2.transform(feature_array)
         
-        # Make prediction
+        
         prediction = model_bo2.predict(feature_array_scaled)[0]
         prediction_proba = model_bo2.predict_proba(feature_array_scaled)[0]
         
-        # Get probabilities
+        
         prob_not_popular = float(prediction_proba[0])
         prob_popular = float(prediction_proba[1])
         
@@ -670,7 +670,7 @@ def classify_cuisine(request: CuisineClassificationRequest):
         )
     
     try:
-        # Get ingredients from request
+        
         ingredients = [ing.strip().lower() for ing in request.ingredients if ing.strip()]
         
         if len(ingredients) == 0:
@@ -679,44 +679,44 @@ def classify_cuisine(request: CuisineClassificationRequest):
                 detail="Please provide at least one ingredient"
             )
         
-        # Create feature vector with all ingredients set to 0
+        
         feature_vector = np.zeros(len(ingredient_cols_bo5))
         
-        # Set features to 1 where ingredients match
+        
         matched_ingredients = []
         for ingredient in ingredients:
             ingredient_lower = ingredient.lower()
-            # Find columns that contain this ingredient
+            
             for idx, col in enumerate(ingredient_cols_bo5):
                 if ingredient_lower in col.lower():
                     feature_vector[idx] = 1.0
                     if ingredient not in matched_ingredients:
                         matched_ingredients.append(ingredient)
         
-        # Reshape for prediction (1 sample, n features)
+        
         feature_array = feature_vector.reshape(1, -1)
         
-        # Make prediction
+        
         prediction_encoded = model_bo5.predict(feature_array)
         prediction = label_encoder_bo5.inverse_transform(prediction_encoded)[0]
         
-        # Get probabilities for all classes
+        
         probabilities = model_bo5.predict_proba(feature_array)[0]
         classes = label_encoder_bo5.classes_
         
-        # Create probability dictionary
+        
         cuisine_probabilities = {}
         for cuisine, prob in zip(classes, probabilities):
             cuisine_probabilities[cuisine] = float(prob)
         
-        # Sort by probability
+        
         sorted_probabilities = sorted(
             cuisine_probabilities.items(), 
             key=lambda x: x[1], 
             reverse=True
         )
         
-        # Get confidence (highest probability)
+        
         confidence = float(probabilities[prediction_encoded[0]]) * 100
         
         return {
@@ -750,7 +750,7 @@ def predict_user_profile(request: UserProfilingRequest):
         raise HTTPException(status_code=503, detail="BO4 model not loaded")
     
     try:
-        # Create feature array in correct order
+        
         user_data = pd.DataFrame({
             'Avg_Rating': [request.Avg_Rating],
             'Avg_Calories': [request.Avg_Calories],
@@ -760,18 +760,14 @@ def predict_user_profile(request: UserProfilingRequest):
             'Review_Count': [request.Review_Count]
         })
         
-        # Scale the features
         user_data_scaled = scaler_bo4.transform(user_data)
         
-        # Predict cluster
         predicted_cluster = model_bo4.predict(user_data_scaled)[0]
         
-        # Get cluster name and description
         cluster_name = cluster_info_bo4["cluster_names"].get(str(predicted_cluster), f"Cluster {predicted_cluster}")
         cluster_description = cluster_info_bo4["cluster_descriptions"].get(str(predicted_cluster), "Description not available")
         marketing_strategy = cluster_info_bo4["marketing_strategies"].get(str(predicted_cluster), "Strategy not available")
         
-        # Get confidence if available
         confidence = None
         if hasattr(model_bo4, 'predict_proba'):
             try:
